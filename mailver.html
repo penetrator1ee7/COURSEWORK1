@@ -1,0 +1,100 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<title id="title">
+    Mail verification
+</title>
+<style>
+    body {
+        background-image: url(img.jpg);
+        background-size: 100% auto;
+    }.alert{
+         margin: 200px;
+     }
+</style>
+
+<body>
+<button class="btn btn-secondary my-2 my-sm-0" type="submit" onclick="change()" id="verChange">Push to phone verification</button>
+<div class="container">
+    <div class="row justify-content-center" >
+        <div class="col-4" style="margin-top: 150px;">
+            <input class="form-control mr-sm-4" id="mail" type="text" placeholder="Write new mail address here">
+
+            <button class="btn btn-secondary my-2 my-sm-0" type="submit" onclick="update()">Update</button>
+<br><br>
+            <input class="form-control mr-sm-4" id="secret" type="text" placeholder="Your verification code">
+
+            <button class="btn btn-secondary my-2 my-sm-0" type="submit" onclick="set()">Set</button>
+            <div id="out">
+
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+<script>
+    let phoneFlag=-1;
+    let change=function(){
+if(phoneFlag==-1) {
+    document.getElementById('verChange').innerHTML = 'Push to mail verification';
+    document.getElementById('title').innerHTML = 'Phone verification';
+    document.getElementById('mail').placeholder = 'Write phone number here';
+}
+if(phoneFlag==1){
+    document.getElementById('verChange').innerHTML = 'Push to phone verification';
+    document.getElementById('title').innerHTML = 'Mail verification';
+    document.getElementById('mail').placeholder = 'Write new mail address here';
+
+        }
+        phoneFlag*=-1
+    }
+
+    let leave=function(){
+        document.location.href ='userPage.php';
+    };
+
+    let update=function(){
+       if(! document.getElementById('mail').value.indexOf('@') && phoneFlag==-1){
+           alert('Please insert your mail address in format example@example.com')
+       }else{
+           let promise=new Promise(function(resolve,reject){
+           let xhr=new XMLHttpRequest();
+           xhr.open('POST','mailer.php',true);
+           xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+           xhr.send(JSON.stringify({'mail': document.getElementById('mail').value,'flag': phoneFlag}));
+           xhr.onload=function(){
+               switch (this.status) {
+                   case'200':console.log('Ok');document.getElementById('out').innerHTML='Your mail was successfully updated.'
+                   default: console.log('Server error.Please try again.');
+               }
+           }
+       });
+           promise.then();
+       };
+    }
+    let set=function() {
+        let promise = new Promise(function (resolve, reject) {
+            let xhr = new XMLHttpRequest();
+            xhr.open('PUT', 'mailer.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+            xhr.send(JSON.stringify({'secret': document.getElementById('secret').value,'flag': phoneFlag}));
+            xhr.onload = function (){
+                console.log(this.status);
+                switch(this.status){
+                    case 200: console.log('Ok');
+                        document.getElementById('out').innerHTML = 'Your mail was successfully verified.' +
+                            '<br><button class="btn btn-secondary my-2 my-sm-0" type="submit" onclick="leave()">Main menu</button>';
+                    case 412: console.log('Wrong verification code.');
+                    case 400: console.log('Server error.Please try again.');
+                }
+            }
+        });
+        promise.then();
+    }
+</script>
+
+</html>

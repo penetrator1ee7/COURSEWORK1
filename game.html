@@ -1,0 +1,141 @@
+<html>
+<head>
+    <meta charset =utf-8 http-equiv="Refresh" content="80">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+<title>Dicing Room</title>
+<body style="background-image: url(img.jpg)" onload="update()">
+     <div class="border border-dark">
+         <nav  class="navbar navbar-dark bg-inverse" >
+             <div id="name" style="margin-left: 0%">
+                 Good luck,
+             </div>
+             <button type="button" class="btn-outline-dark btn-lg" style="margin-left: 80%" onclick="update()">
+              <img src="update.gif"width="20" height="20" >
+             </button>
+             <button class="btn btn-outline-dark" onclick="leave()">Main menu</button>
+         </nav>
+     </div>
+<div class="container">
+    <div class="row">
+            <div class="col-md-8 offset-md-2" style="margin-top:10%">
+                <table class="table table-bordered ">
+                    <thead>
+                        <tr>
+                            <th>Your score</th>
+                            <th>Opponent`s score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="YourScore"></td>
+                            <td id="OpScore"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+    </div>
+
+</div>
+
+     <div class="row justify-content-center" style="margin-right: 5%" id="turn">
+    Opponent`s turn
+    </div>
+
+     <div class="container" style="margin-top: 10%;margin-left: 17%">
+         <div class="row">
+             <div class="col">
+                 <p style="margin-left:-15%;margin-right: 35%"><img name="smt" src=gify.gif width="150" height="90" ></p>
+                 <button class="btn btn-secondary" onmouseover="document.smt.src='gif.gif'" onmouseout="document.smt.src='gify.gif'" onclick="dice()">Dice</button>
+             </div>
+             <div class="col-7" >
+                <table class="table table-bordered" style="margin-left: -12%;margin-top: 5%">
+                    <tbody>
+                    <tr>
+                        <td id="bet">1</td>
+                    </tr>
+                    <tr>
+                        <td id="roll">1</td>
+                    </tr>
+                    </tbody>
+                </table>
+             </div>
+             <div class="col" >
+                 <p style="margin-left:-15%"><img name="smth" src=pigy.gif width="150" height="90"></p>
+                 <button class="btn btn-secondary" style="margin-right:-30%" onmouseover="document.smth.src='pig.gif'" onmouseout="document.smth.src='pigy.gif'" onclick="pass()">Pass</button>
+             </div>
+
+         </div>
+     </div>
+
+<script>
+
+    let f=function(data,status){
+       data.forEach(function (el){
+          document.getElementById('name').innerText='Good Luck, '+el.name;
+           document.getElementById('YourScore').innerText = el.YourScore;
+           document.getElementById('OpScore').innerText = el.OpScore;
+           document.getElementById('bet').innerText ='Current bet is '+ el.Bet;
+           document.getElementById('roll').innerText = 'You rolled '+el.Rolled;
+           if(el.turn==1){
+               document.getElementById('turn').innerText = 'Your turn';
+           }else{
+               document.getElementById('turn').innerText = 'Opponent`s turn';
+           };
+           switch (el.win) {
+               case'1':document.getElementById('turn').innerText = 'Your won';
+               case '-1':document.getElementById('turn').innerText = 'Your lost';
+           }
+           console.log(el.err)
+       })
+    };
+
+   let update=function(){
+       $.getJSON('gameServer.php', f );
+   }
+
+   let leave=function () {
+       document.location.href ='userPage.php';
+   }
+
+   let dice=function(){
+        let promise=new Promise(function(resolve,reject){
+            let xhr=new XMLHttpRequest();
+            xhr.open('POST','gameServer.php',true);
+            xhr.send();
+            xhr.onload=function(){
+                f(JSON.parse(this.responseText));
+                switch (this.status) {
+                    case'200':console.log('diced');
+                    case'403':alert('It is not your turn now');
+                    case'400':console.log('Bad Request');
+                    case'302':leave();
+                }
+            }
+       });
+       promise.then();
+   }
+
+   let pass=function(){
+       let promise=new Promise(function(resolve,reject){
+           let xhr=new XMLHttpRequest();
+           xhr.open('PUT','gameServer.php',true);
+           xhr.send();
+           xhr.onload=function(){
+               f(JSON.parse(this.responseText));
+               switch (this.status) {
+                   case'200':console.log('diced');
+                   case'403':alert('It is not your turn now');
+                   case'400':console.log('Bad Request');
+                   case'302':leave();
+               }
+           }
+       });
+       promise.then();
+   }
+
+</script>
+
+</body>
+</html>

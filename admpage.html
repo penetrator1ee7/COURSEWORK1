@@ -1,0 +1,96 @@
+<html>
+<head>
+    <script
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<style>
+    body {
+        background-repeat: no-repeat;
+        background-image: url(img.jpg);
+        background-size: 100% auto;
+    }
+
+
+</style>
+<body>
+<div class="container">
+    <div class="row justify-content-start" style="padding-top: 10%">
+        <div class="col-md-6">
+            <table class="table table-hover table-bordered" id="table" style="background-color:#dbdbdb">
+
+
+
+                <script>
+                    let table= document.getElementById('table');
+
+
+                    let f=function(data,status){
+                        let html="     <thead class=\"thead-dark\">       " +
+                            " <tr>\n" +
+                            "                <th>User id</th>\n" +
+                            "                <th>User name</th>\n" +
+                            "                <th>User status</th>\n" +
+                            "                <th>Ban</th>\n" +
+                            "                <th>Unban</th>\n" +
+                            "            </tr>\n"+
+                            "</thead>";
+                        data.forEach(function(el){
+                            console.log(el[0]);
+                            html += `<tr><td > ${el[0]}</td><td  onclick="update(${el[0]})">${el[1]}</td><td > ${el[2]}</td><td onclick="del(${el[0]}+'/1')"">x</td><td onclick="del(${el[0]}+'/0')"">✓</td></tr>`
+                            table.innerHTML = html;
+                            return html
+                        })
+                    }
+
+                    let update=async function(itemId){
+                        let promise = new Promise ((resolve, reject) =>{
+                            let itemName=prompt('Enter new username');
+                            let httpRequest=new XMLHttpRequest();
+                            httpRequest.open("PUT","admpage.php");
+                            httpRequest.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+                            httpRequest.send(JSON.stringify({'id':itemId,'itemName':itemName}));
+                            httpRequest.onload=function(){
+                                switch(this.status){
+                                    case 200: console.log('updated username with id №'+ itemId);
+                                    case 302: document.location.href ='userPage.php';
+                                    default: reject('Error while updating username №'+ itemId);
+                                }
+                            }
+                            $.getJSON('admpage.php',f)
+                        })
+                        let result=await promise
+                        alert(result)
+                    }
+
+                    let del=function(itemId){
+                        $.ajax({
+                            method: "DELETE",
+                            url:'admpage/'+itemId,
+                            success: () => {
+                                console.log("Banned user №" + itemId);
+                                console.log(this.status);
+                                $.getJSON('admpage.php', f);
+                            },
+                            error: () => {
+                                console.log(this.status);
+                                alert("Error banning user №" + itemId);
+                            }
+                        });
+                    };
+
+                    $.getJSON('admpage.php',f);
+
+                </script>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
+</body>
+</html>
